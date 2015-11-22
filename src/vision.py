@@ -71,7 +71,7 @@ while(1):
     # --- masking ---
     if persp_img != None:
         hsv = cv2.cvtColor(persp_img, cv2.COLOR_BGR2HSV)
-        for obj, (lower, upper, color) in objects.items():
+        for obj, (lower, upper, bgr) in objects.items():
             upper = np.array(upper)
             lower = np.array(lower)
             mask = cv2.inRange(hsv, lower, upper)
@@ -85,16 +85,20 @@ while(1):
             areas = cnts
             areas = [x for x in areas if cv2.contourArea(x) > 20]
             areas = sorted(areas, key=cv2.contourArea, reverse=True)[:3]
+            msg.numpolys = len(areas)
             for c in areas:
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.05 * peri, True)
-                (x,y), radius = cv2.minEnclosingCircle(c)
-                print obj + " : " + "x: " + str(200-x) + "y: " + str(y+50) + " rad: " + str(radius)
-                cv2.drawContours(persp_img, [approx], -1, color, 4)
-                msg.x.append(x)
-                msg.y.append(y)
+                (cx,cy), radius = cv2.minEnclosingCircle(c)
+                # print obj + " : " + "x: " + str(200-x) + "y: " + str(y+50) + " rad: " + str(radius)
+                cv2.drawContours(persp_img, [approx], -1, bgr, 4)
+                msg.numpoints.append(len(approx))
                 msg.radius.append(radius)
                 msg.color.append(obj)
+                for p in approx:
+                    msg.x.append(p[0][0])
+                    msg.y.append(p[0][1])
+
         cv2.imshow('persp', persp_img)
         object_publisher.publish(msg)
 
