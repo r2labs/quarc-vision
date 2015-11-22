@@ -95,13 +95,13 @@ while(1):
                 msg.y.append(y)
                 msg.radius.append(radius)
                 msg.color.append(obj)
-        # cv2.imshow('persp', persp_img)
+        cv2.imshow('persp', persp_img)
         object_publisher.publish(msg)
 
-    # cv2.imshow('original', img)
-    # k = cv2.waitKey(5) & 0xFF
-    # if k == 27:
-    #     break
+    cv2.imshow('original', img)
+    k = cv2.waitKey(5) & 0xFF
+    if k == 27:
+        break
 
 cap.release()
 cv2.destroyAllWindows()
