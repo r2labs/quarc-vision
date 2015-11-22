@@ -1,8 +1,9 @@
 float32[] x
 float32[] y
+float32[] cx
+float32[] cy
 uint16[] numpoints # serialized as a string!
 float32[] radius
-uint16 numpolys
 string[] color
 # color will be one of ["red", "green", "blue"]
 

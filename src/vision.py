@@ -83,9 +83,9 @@ while(1):
             masked = cv2.bitwise_and(persp_img, persp_img, mask=mask)
 
             areas = cnts
+            areas = [x for x in areas if len(x) > 2]
             areas = [x for x in areas if cv2.contourArea(x) > 20]
             areas = sorted(areas, key=cv2.contourArea, reverse=True)[:3]
-            msg.numpolys = len(areas)
             for c in areas:
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.05 * peri, True)
@@ -95,6 +95,8 @@ while(1):
                 msg.numpoints.append(len(approx))
                 msg.radius.append(radius)
                 msg.color.append(obj)
+                msg.cx.append(cx)
+                msg.cy.append(cy)
                 for p in approx:
                     msg.x.append(p[0][0])
                     msg.y.append(p[0][1])
