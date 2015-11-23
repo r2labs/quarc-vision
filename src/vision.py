@@ -4,6 +4,7 @@ import cv2
 import rospy
 import numpy as np
 from quarc_vision.msg import vision_object
+from time import sleep
 
 objects = {"green" : [[22, 50, 0], [56, 220, 225], [0, 255, 0]],
            "blue": [[83, 95, 64], [124, 255, 255], [255, 0, 0]],
@@ -28,7 +29,7 @@ def find_squares(img):
                 bin = cv2.dilate(bin, None)
             else:
                 retval, bin = cv2.threshold(gray, thrs, 255, cv2.THRESH_BINARY)
-            bin, contours, hierarchy = cv2.findContours(bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            contours, hierarchy = cv2.findContours(bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
             for cnt in contours:
                 cnt_len = cv2.arcLength(cnt, True)
                 cnt = cv2.approxPolyDP(cnt, 0.025*cnt_len, True)
@@ -42,8 +43,10 @@ def find_squares(img):
 cap = cv2.VideoCapture(0)
 
 while(1):
+    sleep(0.5)
     msg = vision_object()
     _, img = cap.read()
+    img = cv2.resize(img, (400,300))
 
     # # --- square finding ---
     edges = find_squares(img)
@@ -76,13 +79,13 @@ while(1):
             lower = np.array(lower)
             mask = cv2.inRange(hsv, lower, upper)
             # persp_img = cv2.bitwise_and(persp_img,persp_img,mask = mask)
-            (contours, cnts, _) = cv2.findContours(mask.copy(),
+            contours, cnts = cv2.findContours(mask.copy(),
                                                 cv2.RETR_EXTERNAL,
                                                 cv2.CHAIN_APPROX_SIMPLE)
 
             masked = cv2.bitwise_and(persp_img, persp_img, mask=mask)
 
-            areas = cnts
+            areas = contours
             areas = [x for x in areas if len(x) > 2]
             areas = [x for x in areas if cv2.contourArea(x) > 20]
             areas = sorted(areas, key=cv2.contourArea, reverse=True)[:3]
@@ -101,10 +104,10 @@ while(1):
                     msg.x.append(p[0][0])
                     msg.y.append(p[0][1])
 
-        cv2.imshow('persp', persp_img)
+#        cv2.imshow('persp', persp_img)
         object_publisher.publish(msg)
 
-    cv2.imshow('original', img)
+#    cv2.imshow('original', img)
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
         break
